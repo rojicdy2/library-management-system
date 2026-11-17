@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { UserPlus, Pencil, Trash2, KeyRound, Phone, Mail } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../auth';
@@ -24,7 +24,18 @@ export default function People({ staffMode = false }) {
     }
   }
 
-  useEffect(() => { load(); }, [staffMode]);
+  useEffect(() => {
+    const fetchPeople = async () => {
+      try {
+        const { data } = await api.get('/users');
+        setRows(data.filter((u) => (staffMode ? u.role !== 'member' : u.role === 'member')));
+      } catch {
+        setError('Could not load the list');
+      }
+    };
+
+    void fetchPeople();
+  }, [staffMode]);
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -137,8 +148,8 @@ export default function People({ staffMode = false }) {
           </thead>
           <tbody>
             {rows.map((u) => (
-              <>
-                <tr key={u.id}>
+              <Fragment key={u.id}>
+                <tr>
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>{u.phone || '-'}</td>
@@ -163,7 +174,7 @@ export default function People({ staffMode = false }) {
                   </td>
                 </tr>
                 {pwdId === u.id && (
-                  <tr key={`pwd-${u.id}`}>
+                  <tr>
                     <td colSpan={staffMode ? 5 : 4}>
                       <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '8px 0' }}>
                         <input
@@ -183,7 +194,7 @@ export default function People({ staffMode = false }) {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

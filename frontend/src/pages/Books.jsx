@@ -23,7 +23,18 @@ export default function Books() {
     }
   }
 
-  useEffect(() => { load(''); }, []);
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const { data } = await api.get('/books', { params: { search: '' } });
+        setBooks(data);
+      } catch {
+        setError('Could not load books');
+      }
+    };
+
+    void fetchBooks();
+  }, []);
 
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 

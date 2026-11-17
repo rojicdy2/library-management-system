@@ -25,7 +25,24 @@ export default function Issue() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [u, b, i] = await Promise.all([
+          api.get('/users'),
+          api.get('/books'),
+          api.get('/issues'),
+        ]);
+        setMembers(u.data.filter((x) => x.role === 'member'));
+        setBooks(b.data.filter((x) => x.available_copies > 0));
+        setIssues(i.data.filter((x) => x.status !== 'Returned'));
+      } catch {
+        setMsg({ type: 'error', text: 'Could not load data' });
+      }
+    };
+
+    void fetchData();
+  }, []);
 
   async function issueBook(e) {
     e.preventDefault();

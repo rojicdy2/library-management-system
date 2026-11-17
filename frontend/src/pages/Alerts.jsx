@@ -17,7 +17,18 @@ export default function Alerts() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const { data } = await api.get('/issues/due-soon');
+        setItems(data);
+      } catch {
+        setError('Could not load alerts');
+      }
+    };
+
+    void fetchAlerts();
+  }, []);
 
   async function notify(id) {
     try {
